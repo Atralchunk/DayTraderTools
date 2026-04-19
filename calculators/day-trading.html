@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Day Trading Calculator — CalcHub</title>
+  <title>Day Trading Calculator — Day Trader Tools</title>
   <meta name="description" content="Simulate your day trading strategy. Calculate expectancy, streaks, break-even win rate and balance curve over any number of trades.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -12,22 +12,21 @@
 <body>
 
   <nav class="nav">
-    <a href="../index.html" class="nav-logo">CALCHUB</a>
+    <a href="../index.html" class="nav-logo">DAY TRADER TOOLS</a>
     <div class="nav-links">
       <a href="../index.html">Home</a>
       <a href="../blog/index.html">Blog</a>
-      <a href="day-trading.html" class="active">Calculators</a>
+      <a href="../education/index.html">Education</a>
+      <a href="../calculators/day-trading.html" class="active">Calculators</a>
     </div>
   </nav>
 
   <div class="calc-page">
     <div class="breadcrumb">
       <a href="../index.html">Home</a>
-      <a href="../blog/index.html">Blog</a>
       <span>/</span>
       <span style="color:rgba(255,255,255,0.5)">Day trading calculator</span>
     </div>
-
     <div class="calc-page-title">Day trading calculator</div>
     <div class="calc-page-sub">Simulate your strategy over any number of trades</div>
 
@@ -57,8 +56,7 @@
           <input type="number" id="riskpct" value="1" min="0.1" max="100" step="0.1">
           <span class="hint">% of balance lost on a losing trade</span>
         </div>
-        <div class="inp-field">
-        </div>
+        <div class="inp-field"></div>
       </div>
 
       <button class="calc-btn" onclick="calculate()">Calculate →</button>
@@ -149,15 +147,42 @@
     </div>
   </div>
 
+  <div class="disclaimer-bar">
+    <strong style="color:rgba(255,255,255,0.6);">Educational purposes only.</strong> Nothing on this site is financial advice or a recommendation to trade. Trading involves significant risk. <a href="../disclaimer.html">Read our full disclaimer →</a>
+  </div>
+
   <footer class="footer">
-    <div class="footer-logo">CALCHUB</div>
-    <div class="footer-copy">Free to use, always.</div>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">DAY TRADER TOOLS</div>
+        <p class="footer-tagline">Free tools and education for day traders and prop traders. No paywalls, ever.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <a href="../calculators/day-trading.html">Day trading simulator</a>
+        <a href="../calculators/prop-eval.html">Prop eval calculator</a>
+        <a href="../calculators/funded-account.html">Funded account calculator</a>
+      </div>
+      <div class="footer-col">
+        <h4>Site</h4>
+        <a href="../blog/index.html">Blog</a>
+        <a href="../education/index.html">Education</a>
+        <a href="../about.html">About</a>
+        <a href="mailto:blahblah23@blahblah.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 Day Trader Tools. For educational use only.</div>
+      <div class="footer-legal">
+        <a href="../disclaimer.html">Disclaimer</a>
+        <a href="../privacy.html">Privacy policy</a>
+      </div>
+    </div>
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script>
     let chartInst = null;
-
     function fmt(n)       { return '$' + Math.round(n).toLocaleString(); }
     function fmtPct(n)    { return (n >= 0 ? '+' : '') + n.toFixed(2) + '%'; }
     function fmtDollar(n) { return (n >= 0 ? '+' : '') + '$' + Math.abs(Math.round(n)).toLocaleString(); }
@@ -168,7 +193,6 @@
       const winRate   = parseFloat(document.getElementById('winrate').value) / 100;
       const rr        = parseFloat(document.getElementById('rr').value);
       const riskPct   = parseFloat(document.getElementById('riskpct').value) / 100;
-
       if ([balance0, numTrades, winRate, rr, riskPct].some(isNaN)) return;
 
       let balance = balance0, peak = balance0, maxDD = 0, wins = 0, losses = 0;
@@ -181,13 +205,11 @@
         const riskAmt = balance * riskPct;
         const isWin   = Math.random() < winRate;
         const pnl     = isWin ? riskAmt * rr : -riskAmt;
-
         balance += pnl;
         if (balance > peak) peak = balance;
         const dd = ((peak - balance) / peak) * 100;
         if (dd > maxDD) maxDD = dd;
         isWin ? wins++ : losses++;
-
         if (isWin) {
           curWin++; tmpWin += pnl;
           if (curWin > maxWin) { maxWin = curWin; winBal = tmpWin; }
@@ -197,71 +219,42 @@
           if (curLose > maxLose) { maxLose = curLose; loseBal = tmpLose; }
           curWin = 0; tmpWin = 0;
         }
-
-        tradeLog.push({ i, isWin, riskAmt, pnl, balance,
-          streak: isWin ? curWin : curLose,
-          streakType: isWin ? 'W' : 'L'
-        });
+        tradeLog.push({ i, isWin, riskAmt, pnl, balance, streak: isWin ? curWin : curLose, streakType: isWin ? 'W' : 'L' });
         balanceHistory.push(balance);
       }
 
-      const netPnl     = balance - balance0;
-      const ret        = ((balance - balance0) / balance0) * 100;
+      const netPnl = balance - balance0;
+      const ret = ((balance - balance0) / balance0) * 100;
       const expectancy = ((winRate * rr) - (1 - winRate)) * (balance0 * riskPct);
-      const beRate     = 1 / (1 + rr);
-      const beRatePct  = beRate * 100;
-      const yourRate   = winRate * 100;
-      const edgePct    = yourRate - beRatePct;
+      const beRate = 1 / (1 + rr);
+      const beRatePct = beRate * 100;
+      const yourRate = winRate * 100;
+      const edgePct = yourRate - beRatePct;
 
       document.getElementById('r-final').textContent = fmt(balance);
-      const pnlEl = document.getElementById('r-pnl');
-      pnlEl.textContent = fmtDollar(netPnl);
-      pnlEl.className = 'mv ' + (netPnl >= 0 ? 'pos' : 'neg');
-      const retEl = document.getElementById('r-ret');
-      retEl.textContent = fmtPct(ret);
-      retEl.className = 'mv ' + (ret >= 0 ? 'pos' : 'neg');
-      const expEl = document.getElementById('r-exp');
-      expEl.textContent = fmtDollar(expectancy);
-      expEl.className = 'mv ' + (expectancy >= 0 ? 'pos' : 'neg');
+      const pnlEl = document.getElementById('r-pnl'); pnlEl.textContent = fmtDollar(netPnl); pnlEl.className = 'mv ' + (netPnl >= 0 ? 'pos' : 'neg');
+      const retEl = document.getElementById('r-ret'); retEl.textContent = fmtPct(ret); retEl.className = 'mv ' + (ret >= 0 ? 'pos' : 'neg');
+      const expEl = document.getElementById('r-exp'); expEl.textContent = fmtDollar(expectancy); expEl.className = 'mv ' + (expectancy >= 0 ? 'pos' : 'neg');
       document.getElementById('r-wins').textContent = wins;
       document.getElementById('r-losses').textContent = losses;
       document.getElementById('r-dd').textContent = '-' + maxDD.toFixed(1) + '%';
       document.getElementById('r-peak').textContent = fmt(peak);
-
       document.getElementById('r-maxloss').textContent = maxLose + ' in a row';
-      document.getElementById('r-maxloss-sub').textContent =
-        'Balance lost during streak: ' + fmtDollar(loseBal) +
-        '. Probability of a streak this long: ' +
-        (Math.pow(1 - winRate, maxLose) * 100).toFixed(2) + '% per trade.';
+      document.getElementById('r-maxloss-sub').textContent = 'Balance lost during streak: ' + fmtDollar(loseBal) + '. Probability of a streak this long: ' + (Math.pow(1 - winRate, maxLose) * 100).toFixed(2) + '% per trade.';
       document.getElementById('r-maxwin').textContent = maxWin + ' in a row';
-      document.getElementById('r-maxwin-sub').textContent =
-        'Balance gained during streak: ' + fmtDollar(winBal) + '.';
-
+      document.getElementById('r-maxwin-sub').textContent = 'Balance gained during streak: ' + fmtDollar(winBal) + '.';
       document.getElementById('be-rr-label').textContent = rr.toFixed(1);
       document.getElementById('be-rate').textContent = beRatePct.toFixed(1) + '%';
-      const yoursEl = document.getElementById('be-yours');
-      yoursEl.textContent = yourRate.toFixed(1) + '%';
-      yoursEl.className = 'be-val ' + (yourRate > beRatePct ? 'pos' : 'neg');
-      const edgeEl = document.getElementById('be-edge');
-      edgeEl.textContent = (edgePct >= 0 ? '+' : '') + edgePct.toFixed(1) + ' pp';
-      edgeEl.className = 'be-val ' + (edgePct > 0 ? 'pos' : 'neg');
-      const barEl = document.getElementById('be-bar');
-      barEl.style.width = Math.min(100, Math.max(0, yourRate)) + '%';
-      barEl.style.background = edgePct > 0 ? '#1D9E75' : '#E24B4A';
+      const yoursEl = document.getElementById('be-yours'); yoursEl.textContent = yourRate.toFixed(1) + '%'; yoursEl.className = 'be-val ' + (yourRate > beRatePct ? 'pos' : 'neg');
+      const edgeEl = document.getElementById('be-edge'); edgeEl.textContent = (edgePct >= 0 ? '+' : '') + edgePct.toFixed(1) + ' pp'; edgeEl.className = 'be-val ' + (edgePct > 0 ? 'pos' : 'neg');
+      const barEl = document.getElementById('be-bar'); barEl.style.width = Math.min(100, Math.max(0, yourRate)) + '%'; barEl.style.background = edgePct > 0 ? '#1D9E75' : '#E24B4A';
       document.getElementById('be-bar-mid').textContent = beRatePct.toFixed(1) + '% (break-even)';
 
       const tbody = document.getElementById('tradeTable');
       tbody.innerHTML = '';
       tradeLog.slice(0, 20).forEach(t => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${t.i}</td>
-          <td class="${t.isWin ? 'td-pos' : 'td-neg'}">${t.isWin ? 'WIN' : 'LOSS'}</td>
-          <td class="${t.isWin ? 'td-pos' : 'td-neg'}">${t.streakType}${t.streak}</td>
-          <td>${fmt(t.riskAmt)}</td>
-          <td class="${t.pnl >= 0 ? 'td-pos' : 'td-neg'}">${fmtDollar(t.pnl)}</td>
-          <td>${fmt(t.balance)}</td>
-        `;
+        tr.innerHTML = `<td>${t.i}</td><td class="${t.isWin ? 'td-pos' : 'td-neg'}">${t.isWin ? 'WIN' : 'LOSS'}</td><td class="${t.isWin ? 'td-pos' : 'td-neg'}">${t.streakType}${t.streak}</td><td>${fmt(t.riskAmt)}</td><td class="${t.pnl >= 0 ? 'td-pos' : 'td-neg'}">${fmtDollar(t.pnl)}</td><td>${fmt(t.balance)}</td>`;
         tbody.appendChild(tr);
       });
 
@@ -270,50 +263,16 @@
       const ctx = document.getElementById('chartCanvas').getContext('2d');
       chartInst = new Chart(ctx, {
         type: 'line',
-        data: {
-          labels: balanceHistory.map((_, i) => i === 0 ? 'Start' : i),
-          datasets: [{
-            data: balanceHistory.map(v => Math.round(v)),
-            borderColor: lineColor,
-            borderWidth: 1.5,
-            pointRadius: 0,
-            fill: false,
-            tension: 0.3
-          }]
-        },
-        options: {
-          animation: false,
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { display: false },
-            y: {
-              ticks: {
-                color: 'rgba(255,255,255,0.3)',
-                font: { family: 'Space Mono', size: 10 },
-                callback: v => '$' + v.toLocaleString()
-              },
-              grid: { color: 'rgba(255,255,255,0.04)' }
-            }
-          }
-        }
+        data: { labels: balanceHistory.map((_, i) => i === 0 ? 'Start' : i), datasets: [{ data: balanceHistory.map(v => Math.round(v)), borderColor: lineColor, borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.3 }] },
+        options: { animation: false, responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: 'rgba(255,255,255,0.3)', font: { family: 'Space Mono', size: 10 }, callback: v => '$' + v.toLocaleString() }, grid: { color: 'rgba(255,255,255,0.04)' } } } }
       });
 
       const vEl = document.getElementById('verdict');
       let msg, cls;
-      if (expectancy > 0 && ret > 10) {
-        cls = 'good';
-        msg = `Positive expectancy of ${fmtDollar(expectancy)} per trade with a ${ret.toFixed(1)}% return. Your edge is working — win rate sits ${edgePct.toFixed(1)}pp above break-even. Max losing streak this run: ${maxLose}.`;
-      } else if (expectancy > 0) {
-        cls = 'ok';
-        msg = `Positive expectancy but modest returns. Your win rate is ${edgePct.toFixed(1)}pp above break-even — the edge is there but thin. Max losing streak: ${maxLose} trades in a row.`;
-      } else {
-        cls = 'bad';
-        msg = `Negative expectancy of ${fmtDollar(expectancy)} per trade. Your win rate needs to be at least ${beRatePct.toFixed(1)}% to break even at RR ${rr} — currently ${Math.abs(edgePct).toFixed(1)}pp short. Max losing streak: ${maxLose}.`;
-      }
-      vEl.textContent = msg;
-      vEl.className = 'verdict ' + cls;
-
+      if (expectancy > 0 && ret > 10) { cls = 'good'; msg = `Positive expectancy of ${fmtDollar(expectancy)} per trade with a ${ret.toFixed(1)}% return. Your edge is working — win rate sits ${edgePct.toFixed(1)}pp above break-even. Max losing streak this run: ${maxLose}.`; }
+      else if (expectancy > 0) { cls = 'ok'; msg = `Positive expectancy but modest returns. Your win rate is ${edgePct.toFixed(1)}pp above break-even — the edge is there but thin. Max losing streak: ${maxLose} trades in a row.`; }
+      else { cls = 'bad'; msg = `Negative expectancy of ${fmtDollar(expectancy)} per trade. Your win rate needs to be at least ${beRatePct.toFixed(1)}% to break even at RR ${rr} — currently ${Math.abs(edgePct).toFixed(1)}pp short. Max losing streak: ${maxLose}.`; }
+      vEl.textContent = msg; vEl.className = 'verdict ' + cls;
       document.getElementById('results').classList.add('visible');
     }
   </script>

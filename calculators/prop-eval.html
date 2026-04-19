@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prop Eval Calculator — CalcHub</title>
+  <title>Prop Eval Calculator — Day Trader Tools</title>
   <meta name="description" content="Find your optimal risk per trade to pass a prop trading evaluation. Monte Carlo simulation with conservative, optimal and aggressive scenarios.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -16,14 +16,13 @@
     .tb-cons{background:rgba(29,158,117,0.15);color:#1D9E75;}
     .tb-opt{background:rgba(55,138,221,0.15);color:#378ADD;}
     .tb-agg{background:rgba(239,159,39,0.15);color:#EF9F27;}
-    .tb-rec{background:rgba(55,138,221,0.15);color:#378ADD;}
     .tier-risk{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:#fff;margin-bottom:2px;}
     .tier-lbl{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;}
     .tier-stat{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;}
     .tier-stat:last-child{margin-bottom:0;}
     .tier-stat .ts-l{color:rgba(255,255,255,0.4);}
     .tier-stat .ts-v{font-family:'Space Mono',monospace;font-weight:700;}
-    .ts-pos{color:#1D9E75;} .ts-neg{color:#E24B4A;} .ts-warn{color:#EF9F27;} .ts-neu{color:#fff;}
+    .ts-pos{color:#1D9E75;}.ts-neg{color:#E24B4A;}.ts-warn{color:#EF9F27;}.ts-neu{color:#fff;}
     .streak-warning{background:rgba(226,75,74,0.1);border-left:3px solid #E24B4A;border-radius:8px;padding:10px 14px;font-size:12px;color:rgba(255,255,255,0.75);line-height:1.5;margin-bottom:1.25rem;display:none;}
     .streak-warning.visible{display:block;}
     @media(max-width:600px){.tiers{grid-template-columns:1fr;}}
@@ -32,18 +31,18 @@
 <body>
 
   <nav class="nav">
-    <a href="../index.html" class="nav-logo">CALCHUB</a>
+    <a href="../index.html" class="nav-logo">DAY TRADER TOOLS</a>
     <div class="nav-links">
       <a href="../index.html">Home</a>
       <a href="../blog/index.html">Blog</a>
-      <a href="prop-eval.html" class="active">Calculators</a>
+      <a href="../education/index.html">Education</a>
+      <a href="../calculators/day-trading.html" class="active">Calculators</a>
     </div>
   </nav>
 
   <div class="calc-page">
     <div class="breadcrumb">
       <a href="../index.html">Home</a>
-      <a href="../blog/index.html">Blog</a>
       <span>/</span>
       <span style="color:rgba(255,255,255,0.5)">Prop eval calculator</span>
     </div>
@@ -90,7 +89,7 @@
         </div>
       </div>
 
-      <div class="status-bar" id="statusBar">
+      <div class="status-bar">
         <div class="status-item"><div class="status-label">Drawdown buffer left</div><div class="status-val" id="ddLeft">—</div></div>
         <div class="status-item"><div class="status-label">Drawdown used</div><div class="status-val" id="ddUsedPct">—</div></div>
         <div class="status-item"><div class="status-label">Profit still needed</div><div class="status-val neutral" id="profitLeft">—</div></div>
@@ -107,7 +106,7 @@
         <div class="inp-field">
           <label>Win rate variability (%)</label>
           <input type="number" id="winRateVar" value="5" min="0" max="30">
-          <span class="hint">How much your win rate varies day to day. 5 means it swings 5% either side — so 55% becomes anywhere from 50%–60%</span>
+          <span class="hint">How much your win rate varies. 5 means it swings 5% either side — so 55% becomes anywhere from 50%–60%</span>
         </div>
         <div class="inp-field">
           <label>Risk:Reward ratio</label>
@@ -134,14 +133,10 @@
       <button class="calc-btn" onclick="runSim()">Find my optimal risk →</button>
 
       <div class="results" id="results">
-
         <div class="streak-warning" id="streakWarning"></div>
-
         <p class="section-label">Your three options</p>
         <div class="tiers" id="tiersEl"></div>
-
         <hr class="divider">
-
         <p class="section-label">Detailed breakdown — recommended approach</p>
         <div class="metrics-grid">
           <div class="metric"><div class="ml">Pass probability</div><div class="mv" id="r-pass">—</div></div>
@@ -153,242 +148,136 @@
           <div class="metric"><div class="ml">Worst streak cost</div><div class="mv neg" id="r-streak">—</div></div>
           <div class="metric"><div class="ml">Buffer after streak</div><div class="mv" id="r-buffer">—</div></div>
         </div>
-
         <hr class="divider">
-
         <p class="section-label">Balance paths — conservative / optimal / aggressive</p>
         <div class="chart-wrap">
           <div class="chart-label">Median profit path across simulations</div>
           <canvas id="chartCanvas" height="200"></canvas>
         </div>
-
         <div class="verdict" id="verdict"></div>
-
       </div>
     </div>
   </div>
 
+  <div class="disclaimer-bar">
+    <strong style="color:rgba(255,255,255,0.6);">Educational purposes only.</strong> Nothing on this site is financial advice or a recommendation to trade. Trading involves significant risk. <a href="../disclaimer.html">Read our full disclaimer →</a>
+  </div>
+
   <footer class="footer">
-    <div class="footer-logo">CALCHUB</div>
-    <div class="footer-copy">Free to use, always.</div>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">DAY TRADER TOOLS</div>
+        <p class="footer-tagline">Free tools and education for day traders and prop traders. No paywalls, ever.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <a href="../calculators/day-trading.html">Day trading simulator</a>
+        <a href="../calculators/prop-eval.html">Prop eval calculator</a>
+        <a href="../calculators/funded-account.html">Funded account calculator</a>
+      </div>
+      <div class="footer-col">
+        <h4>Site</h4>
+        <a href="../blog/index.html">Blog</a>
+        <a href="../education/index.html">Education</a>
+        <a href="../about.html">About</a>
+        <a href="mailto:blahblah23@blahblah.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 Day Trader Tools. For educational use only.</div>
+      <div class="footer-legal">
+        <a href="../disclaimer.html">Disclaimer</a>
+        <a href="../privacy.html">Privacy policy</a>
+      </div>
+    </div>
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script>
-    let chartInst = null;
-    function fmt(n){ return '$'+Math.round(Math.abs(n)).toLocaleString(); }
-    function fmtP(n){ return n.toFixed(1)+'%'; }
-
-    function gaussianRand(){
-      let u=0,v=0;
-      while(u===0) u=Math.random();
-      while(v===0) v=Math.random();
-      return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
-    }
+    let chartInst=null;
+    function fmt(n){return '$'+Math.round(Math.abs(n)).toLocaleString();}
+    function fmtP(n){return n.toFixed(1)+'%';}
+    function gaussianRand(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 
     function updateStatus(){
-      const maxDD = parseFloat(document.getElementById('maxDD').value)||5000;
-      const curDD = parseFloat(document.getElementById('currentDD').value)||0;
-      const profitTarget = parseFloat(document.getElementById('profitTarget').value)||8000;
-      const profitSoFar = parseFloat(document.getElementById('profitSoFar').value)||0;
-      const ddLeft = maxDD - curDD;
-      const ddPct = (curDD/maxDD)*100;
-      const pLeft = Math.max(0, profitTarget - profitSoFar);
-
-      const ddEl = document.getElementById('ddLeft');
-      ddEl.textContent = fmt(ddLeft);
-      ddEl.className = 'status-val '+(ddPct<50?'good':ddPct<75?'warn':'danger');
-
-      const dpEl = document.getElementById('ddUsedPct');
-      dpEl.textContent = fmtP(ddPct)+' used';
-      dpEl.className = 'status-val '+(ddPct<50?'good':ddPct<75?'warn':'danger');
-
-      document.getElementById('profitLeft').textContent = fmt(pLeft);
-      const bar = document.getElementById('ddBar');
-      bar.style.width = Math.min(100,ddPct)+'%';
-      bar.style.background = ddPct<50?'#1D9E75':ddPct<75?'#EF9F27':'#E24B4A';
+      const maxDD=parseFloat(document.getElementById('maxDD').value)||5000;
+      const curDD=parseFloat(document.getElementById('currentDD').value)||0;
+      const profitTarget=parseFloat(document.getElementById('profitTarget').value)||8000;
+      const profitSoFar=parseFloat(document.getElementById('profitSoFar').value)||0;
+      const ddLeft=maxDD-curDD,ddPct=(curDD/maxDD)*100,pLeft=Math.max(0,profitTarget-profitSoFar);
+      const ddEl=document.getElementById('ddLeft');ddEl.textContent=fmt(ddLeft);ddEl.className='status-val '+(ddPct<50?'good':ddPct<75?'warn':'danger');
+      const dpEl=document.getElementById('ddUsedPct');dpEl.textContent=fmtP(ddPct)+' used';dpEl.className='status-val '+(ddPct<50?'good':ddPct<75?'warn':'danger');
+      document.getElementById('profitLeft').textContent=fmt(pLeft);
+      const bar=document.getElementById('ddBar');bar.style.width=Math.min(100,ddPct)+'%';bar.style.background=ddPct<50?'#1D9E75':ddPct<75?'#EF9F27':'#E24B4A';
     }
-
-    document.querySelectorAll('input').forEach(el => el.addEventListener('input', updateStatus));
+    document.querySelectorAll('input').forEach(el=>el.addEventListener('input',updateStatus));
     updateStatus();
 
     function simulate(acct,currentDD,profitTarget,profitSoFar,maxDD,maxLpD,maxTpD,winRate,winRateVar,rr,riskPct,simRuns){
-      const winTarget = Math.max(0, profitTarget - profitSoFar);
-      const ddLimit = maxDD - currentDD;
-      let passes=0, blowns=0, totalDPass=0, totalTPass=0;
-      const medPaths = [];
-
-      for(let s=0; s<simRuns; s++){
-        let pnl=0, days=0, trades=0, result='timeout';
-        const path = [0];
-        const sessionWR = Math.max(0.05, Math.min(0.95, winRate + gaussianRand()*(winRateVar/100)));
-
-        while(days<500 && trades<3000){
-          let dayTrades=0, dayLosses=0;
-          days++;
-          while(dayTrades < maxTpD){
-            if(dayLosses >= maxLpD) break;
-            const riskAmt = acct * riskPct;
-            const isWin = Math.random() < sessionWR;
-            const tPnl = isWin ? riskAmt*rr : -riskAmt;
-            pnl += tPnl;
-            trades++;
-            dayTrades++;
-            if(!isWin) dayLosses++;
-            path.push(Math.round(pnl));
-            if(pnl <= -ddLimit){ result='blown'; break; }
-            if(pnl >= winTarget){ result='pass'; break; }
+      const winTarget=Math.max(0,profitTarget-profitSoFar),ddLimit=maxDD-currentDD;
+      let passes=0,blowns=0,totalDPass=0,totalTPass=0;const medPaths=[];
+      for(let s=0;s<simRuns;s++){
+        let pnl=0,days=0,trades=0,result='timeout';const path=[0];
+        const sessionWR=Math.max(0.05,Math.min(0.95,winRate+gaussianRand()*(winRateVar/100)));
+        while(days<500&&trades<3000){
+          let dayTrades=0,dayLosses=0;days++;
+          while(dayTrades<maxTpD){
+            if(dayLosses>=maxLpD)break;
+            const riskAmt=acct*riskPct,isWin=Math.random()<sessionWR,tPnl=isWin?riskAmt*rr:-riskAmt;
+            pnl+=tPnl;trades++;dayTrades++;if(!isWin)dayLosses++;path.push(Math.round(pnl));
+            if(pnl<=-ddLimit){result='blown';break;}if(pnl>=winTarget){result='pass';break;}
           }
-          if(result !== 'timeout') break;
+          if(result!=='timeout')break;
         }
-
-        if(result==='pass'){ passes++; totalDPass+=days; totalTPass+=trades; }
-        else if(result==='blown') blowns++;
-        if(s<3) medPaths.push(path);
+        if(result==='pass'){passes++;totalDPass+=days;totalTPass+=trades;}else if(result==='blown')blowns++;
+        if(s<3)medPaths.push(path);
       }
-
-      return {
-        passRate: (passes/simRuns)*100,
-        blownRate: (blowns/simRuns)*100,
-        avgDPass: passes>0 ? Math.round(totalDPass/passes) : 0,
-        avgTPass: passes>0 ? Math.round(totalTPass/passes) : 0,
-        medPath: medPaths[1]||medPaths[0]||[]
-      };
+      return{passRate:(passes/simRuns)*100,blownRate:(blowns/simRuns)*100,avgDPass:passes>0?Math.round(totalDPass/passes):0,avgTPass:passes>0?Math.round(totalTPass/passes):0,medPath:medPaths[1]||medPaths[0]||[]};
     }
 
     function calcTiers(acct,currentDD,maxDD,maxConsec){
-      const ddPct = currentDD/maxDD;
-      const ddLeft = maxDD - currentDD;
-      let baseRisk;
-      if(ddPct<0.25) baseRisk=1.0;
-      else if(ddPct<0.5) baseRisk=0.7;
-      else if(ddPct<0.7) baseRisk=0.45;
-      else if(ddPct<0.85) baseRisk=0.25;
-      else baseRisk=0.15;
-
-      const safeRisk = (ddLeft*0.8)/(acct*maxConsec)*100;
-      const conservative = Math.min(Math.max(0.1, baseRisk*0.5), safeRisk*0.7);
-      const optimal      = Math.min(Math.max(0.15, baseRisk), safeRisk);
-      const aggressive   = Math.min(Math.max(0.2, baseRisk*1.6), safeRisk*1.4);
-
-      return [
-        {label:'Conservative', badge:'cons', riskPct: conservative/100},
-        {label:'Optimal',      badge:'opt',  riskPct: optimal/100},
-        {label:'Aggressive',   badge:'agg',  riskPct: aggressive/100},
-      ];
+      const ddPct=currentDD/maxDD,ddLeft=maxDD-currentDD;
+      let baseRisk;if(ddPct<0.25)baseRisk=1.0;else if(ddPct<0.5)baseRisk=0.7;else if(ddPct<0.7)baseRisk=0.45;else if(ddPct<0.85)baseRisk=0.25;else baseRisk=0.15;
+      const safeRisk=(ddLeft*0.8)/(acct*maxConsec)*100;
+      return[{label:'Conservative',badge:'cons',riskPct:Math.min(Math.max(0.1,baseRisk*0.5),safeRisk*0.7)/100},{label:'Optimal',badge:'opt',riskPct:Math.min(Math.max(0.15,baseRisk),safeRisk)/100},{label:'Aggressive',badge:'agg',riskPct:Math.min(Math.max(0.2,baseRisk*1.6),safeRisk*1.4)/100}];
     }
 
     function runSim(){
-      const acct         = parseFloat(document.getElementById('accountSize').value);
-      const maxDD        = parseFloat(document.getElementById('maxDD').value);
-      const profitTarget = parseFloat(document.getElementById('profitTarget').value);
-      const currentDD    = parseFloat(document.getElementById('currentDD').value)||0;
-      const profitSoFar  = parseFloat(document.getElementById('profitSoFar').value)||0;
-      const maxLpD       = parseInt(document.getElementById('maxLpD').value);
-      const winRate      = parseFloat(document.getElementById('winRate').value)/100;
-      const winRateVar   = parseFloat(document.getElementById('winRateVar').value);
-      const rr           = parseFloat(document.getElementById('rr').value);
-      const maxConsec    = parseInt(document.getElementById('maxConsec').value);
-      const maxTpD       = parseInt(document.getElementById('maxTpD').value);
-      const simRuns      = parseInt(document.getElementById('simRuns').value);
-
-      if([acct,maxDD,profitTarget,winRate,rr].some(isNaN)) return;
-
-      const tiers = calcTiers(acct,currentDD,maxDD,maxConsec);
-      const results = tiers.map(t=>({...t, ...simulate(acct,currentDD,profitTarget,profitSoFar,maxDD,maxLpD,maxTpD,winRate,winRateVar,rr,t.riskPct,simRuns)}));
-
-      let recIdx=1, bestScore=-Infinity;
-      results.forEach((r,i)=>{ const score=r.passRate*1.2-r.blownRate*0.8; if(score>bestScore){bestScore=score;recIdx=i;} });
-      const rec = results[recIdx];
-      const recRiskAmt = acct * rec.riskPct;
-      const ddLeft = maxDD - currentDD;
-      const streakCost = recRiskAmt * maxConsec;
-      const bufferAfterStreak = ddLeft - streakCost;
-
-      const swEl = document.getElementById('streakWarning');
-      if(bufferAfterStreak < recRiskAmt*2){
-        swEl.textContent = `Warning: your worst ever losing streak of ${maxConsec} losses would cost ${fmt(streakCost)}, leaving only ${fmt(Math.max(0,bufferAfterStreak))} of drawdown buffer. Even the conservative option carries meaningful risk from a single bad streak.`;
-        swEl.classList.add('visible');
-      } else { swEl.classList.remove('visible'); }
-
-      const tiersEl = document.getElementById('tiersEl');
-      tiersEl.innerHTML = '';
+      const acct=parseFloat(document.getElementById('accountSize').value),maxDD=parseFloat(document.getElementById('maxDD').value),profitTarget=parseFloat(document.getElementById('profitTarget').value),currentDD=parseFloat(document.getElementById('currentDD').value)||0,profitSoFar=parseFloat(document.getElementById('profitSoFar').value)||0,maxLpD=parseInt(document.getElementById('maxLpD').value),winRate=parseFloat(document.getElementById('winRate').value)/100,winRateVar=parseFloat(document.getElementById('winRateVar').value),rr=parseFloat(document.getElementById('rr').value),maxConsec=parseInt(document.getElementById('maxConsec').value),maxTpD=parseInt(document.getElementById('maxTpD').value),simRuns=parseInt(document.getElementById('simRuns').value);
+      if([acct,maxDD,profitTarget,winRate,rr].some(isNaN))return;
+      const tiers=calcTiers(acct,currentDD,maxDD,maxConsec);
+      const results=tiers.map(t=>({...t,...simulate(acct,currentDD,profitTarget,profitSoFar,maxDD,maxLpD,maxTpD,winRate,winRateVar,rr,t.riskPct,simRuns)}));
+      let recIdx=1,bestScore=-Infinity;results.forEach((r,i)=>{const s=r.passRate*1.2-r.blownRate*0.8;if(s>bestScore){bestScore=s;recIdx=i;}});
+      const rec=results[recIdx],recRiskAmt=acct*rec.riskPct,ddLeft=maxDD-currentDD,streakCost=recRiskAmt*maxConsec,bufferAfterStreak=ddLeft-streakCost;
+      const swEl=document.getElementById('streakWarning');
+      if(bufferAfterStreak<recRiskAmt*2){swEl.textContent=`Warning: your worst ever losing streak of ${maxConsec} losses would cost ${fmt(streakCost)}, leaving only ${fmt(Math.max(0,bufferAfterStreak))} of drawdown buffer.`;swEl.classList.add('visible');}else{swEl.classList.remove('visible');}
+      const tiersEl=document.getElementById('tiersEl');tiersEl.innerHTML='';
       results.forEach((r,i)=>{
-        const isRec = i===recIdx;
-        const rAmt = acct*r.riskPct;
-        const div = document.createElement('div');
-        div.className = 'tier'+(isRec?' recommended':'');
-        const passCol = r.passRate>=60?'ts-pos':r.passRate>=40?'ts-warn':'ts-neg';
-        const blowCol = r.blownRate<=25?'ts-pos':r.blownRate<=45?'ts-warn':'ts-neg';
-        div.innerHTML = `
-          ${isRec?'<div style="margin-bottom:6px"><span class="tier-badge tb-rec">Recommended</span></div>':''}
-          <span class="tier-badge tb-${r.badge}">${r.label}</span>
-          <div class="tier-risk">${(r.riskPct*100).toFixed(2)}%</div>
-          <div class="tier-lbl">risk per trade<br><span style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4)">${fmt(rAmt)} per trade</span></div>
-          <div class="tier-stat"><span class="ts-l">Pass chance</span><span class="ts-v ${passCol}">${fmtP(r.passRate)}</span></div>
-          <div class="tier-stat"><span class="ts-l">Blow chance</span><span class="ts-v ${blowCol}">${fmtP(r.blownRate)}</span></div>
-          <div class="tier-stat"><span class="ts-l">Est. days to pass</span><span class="ts-v ts-neu">${r.avgDPass>0?'~'+r.avgDPass+'d':'—'}</span></div>
-          <div class="tier-stat"><span class="ts-l">Est. trades to pass</span><span class="ts-v ts-neu">${r.avgTPass>0?'~'+r.avgTPass:'—'}</span></div>
-        `;
+        const isRec=i===recIdx,rAmt=acct*r.riskPct,div=document.createElement('div');div.className='tier'+(isRec?' recommended':'');
+        const passCol=r.passRate>=60?'ts-pos':r.passRate>=40?'ts-warn':'ts-neg',blowCol=r.blownRate<=25?'ts-pos':r.blownRate<=45?'ts-warn':'ts-neg';
+        div.innerHTML=`${isRec?'<div style="margin-bottom:6px"><span class="tier-badge tb-opt">Recommended</span></div>':''}<span class="tier-badge tb-${r.badge}">${r.label}</span><div class="tier-risk">${(r.riskPct*100).toFixed(2)}%</div><div class="tier-lbl">risk per trade<br><span style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4)">${fmt(rAmt)} per trade</span></div><div class="tier-stat"><span class="ts-l">Pass chance</span><span class="ts-v ${passCol}">${fmtP(r.passRate)}</span></div><div class="tier-stat"><span class="ts-l">Blow chance</span><span class="ts-v ${blowCol}">${fmtP(r.blownRate)}</span></div><div class="tier-stat"><span class="ts-l">Est. days to pass</span><span class="ts-v ts-neu">${r.avgDPass>0?'~'+r.avgDPass+'d':'—'}</span></div><div class="tier-stat"><span class="ts-l">Est. trades</span><span class="ts-v ts-neu">${r.avgTPass>0?'~'+r.avgTPass:'—'}</span></div>`;
         tiersEl.appendChild(div);
       });
-
-      const passEl = document.getElementById('r-pass');
-      passEl.textContent = fmtP(rec.passRate);
-      passEl.className = 'mv '+(rec.passRate>=60?'pos':rec.passRate>=40?'warn':'neg');
-      document.getElementById('r-blow').textContent = fmtP(rec.blownRate);
-      const dEl = document.getElementById('r-days');
-      dEl.textContent = rec.avgDPass>0?'~'+rec.avgDPass:'—';
-      dEl.className = 'mv '+(rec.avgDPass>0?'pos':'neg');
-      document.getElementById('r-trades').textContent = rec.avgTPass>0?'~'+rec.avgTPass:'—';
-      document.getElementById('r-riskamt').textContent = fmt(recRiskAmt);
-      document.getElementById('r-reward').textContent = fmt(recRiskAmt*rr);
-      document.getElementById('r-streak').textContent = fmt(streakCost);
-      const bufEl = document.getElementById('r-buffer');
-      bufEl.textContent = bufferAfterStreak>0?fmt(bufferAfterStreak):'Breached';
-      bufEl.className = 'mv '+(bufferAfterStreak>recRiskAmt*3?'pos':bufferAfterStreak>0?'warn':'neg');
-
-      const maxLen = Math.max(...results.map(r=>r.medPath.length));
-      const step = Math.max(1,Math.floor(maxLen/80));
+      const passEl=document.getElementById('r-pass');passEl.textContent=fmtP(rec.passRate);passEl.className='mv '+(rec.passRate>=60?'pos':rec.passRate>=40?'warn':'neg');
+      document.getElementById('r-blow').textContent=fmtP(rec.blownRate);
+      const dEl=document.getElementById('r-days');dEl.textContent=rec.avgDPass>0?'~'+rec.avgDPass:'—';dEl.className='mv '+(rec.avgDPass>0?'pos':'neg');
+      document.getElementById('r-trades').textContent=rec.avgTPass>0?'~'+rec.avgTPass:'—';
+      document.getElementById('r-riskamt').textContent=fmt(recRiskAmt);
+      document.getElementById('r-reward').textContent=fmt(recRiskAmt*rr);
+      document.getElementById('r-streak').textContent=fmt(streakCost);
+      const bufEl=document.getElementById('r-buffer');bufEl.textContent=bufferAfterStreak>0?fmt(bufferAfterStreak):'Breached';bufEl.className='mv '+(bufferAfterStreak>recRiskAmt*3?'pos':bufferAfterStreak>0?'warn':'neg');
+      const maxLen=Math.max(...results.map(r=>r.medPath.length)),step=Math.max(1,Math.floor(maxLen/80));
       const labels=[],d0=[],d1=[],d2=[];
-      for(let i=0;i<maxLen;i+=step){
-        labels.push(i===0?'Start':i);
-        d0.push(results[0].medPath[Math.min(i,results[0].medPath.length-1)]??0);
-        d1.push(results[1].medPath[Math.min(i,results[1].medPath.length-1)]??0);
-        d2.push(results[2].medPath[Math.min(i,results[2].medPath.length-1)]??0);
-      }
-
-      if(chartInst) chartInst.destroy();
-      const ctx = document.getElementById('chartCanvas').getContext('2d');
-      chartInst = new Chart(ctx,{
-        type:'line',
-        data:{labels,datasets:[
-          {label:'Conservative',data:d0,borderColor:'#1D9E75',borderWidth:1.5,pointRadius:0,fill:false,tension:0.3},
-          {label:'Optimal',data:d1,borderColor:'#378ADD',borderWidth:1.5,pointRadius:0,fill:false,tension:0.3,borderDash:[4,3]},
-          {label:'Aggressive',data:d2,borderColor:'#EF9F27',borderWidth:1.5,pointRadius:0,fill:false,tension:0.3}
-        ]},
-        options:{animation:false,responsive:true,
-          plugins:{legend:{display:true,labels:{font:{family:'DM Sans',size:11},color:'rgba(255,255,255,0.5)',boxWidth:20,padding:12}}},
-          scales:{x:{display:false},y:{ticks:{color:'rgba(255,255,255,0.3)',font:{family:'Space Mono',size:10},callback:v=>(v>=0?'+':'')+v.toLocaleString()},grid:{color:'rgba(255,255,255,0.04)'}}}}
-      });
-
-      const vEl = document.getElementById('verdict');
-      const ddPct = (currentDD/maxDD)*100;
-      let msg,cls;
-      if(rec.passRate>=65){
-        cls='good';
-        msg=`You're in a solid position. At ${(rec.riskPct*100).toFixed(2)}% risk per trade (${fmt(recRiskAmt)} per trade) you have a ${fmtP(rec.passRate)} chance of passing in approximately ${rec.avgDPass} days. Your worst ever losing streak of ${maxConsec} losses would cost ${fmt(streakCost)}, leaving ${fmt(Math.max(0,bufferAfterStreak))} of buffer — you can absorb it.`;
-      } else if(rec.passRate>=40){
-        cls='ok';
-        msg=`Your position is tight — ${fmtP(ddPct)} of drawdown used. The recommended ${(rec.riskPct*100).toFixed(2)}% risk gives a ${fmtP(rec.passRate)} pass chance over ~${rec.avgDPass} days. A losing streak of ${maxConsec} would cost ${fmt(streakCost)}. Stick to your daily loss limit and do not increase size.`;
-      } else {
-        cls='bad';
-        msg=`This is a difficult recovery. Even the conservative approach gives only a ${fmtP(results[0].passRate)} pass chance. With ${fmt(ddLeft)} of buffer left, focus on capital preservation above everything else. Small, high-quality trades only.`;
-      }
-      vEl.textContent = msg;
-      vEl.className = 'verdict '+cls;
-      document.getElementById('results').classList.add('visible');
-      updateStatus();
+      for(let i=0;i<maxLen;i+=step){labels.push(i===0?'Start':i);d0.push(results[0].medPath[Math.min(i,results[0].medPath.length-1)]??0);d1.push(results[1].medPath[Math.min(i,results[1].medPath.length-1)]??0);d2.push(results[2].medPath[Math.min(i,results[2].medPath.length-1)]??0);}
+      if(chartInst)chartInst.destroy();
+      const ctx=document.getElementById('chartCanvas').getContext('2d');
+      chartInst=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Conservative',data:d0,borderColor:'#1D9E75',borderWidth:1.5,pointRadius:0,fill:false,tension:0.3},{label:'Optimal',data:d1,borderColor:'#378ADD',borderWidth:1.5,pointRadius:0,fill:false,tension:0.3,borderDash:[4,3]},{label:'Aggressive',data:d2,borderColor:'#EF9F27',borderWidth:1.5,pointRadius:0,fill:false,tension:0.3}]},options:{animation:false,responsive:true,plugins:{legend:{display:true,labels:{font:{family:'DM Sans',size:11},color:'rgba(255,255,255,0.5)',boxWidth:20,padding:12}}},scales:{x:{display:false},y:{ticks:{color:'rgba(255,255,255,0.3)',font:{family:'Space Mono',size:10},callback:v=>(v>=0?'+':'')+v.toLocaleString()},grid:{color:'rgba(255,255,255,0.04)'}}}}});
+      const vEl=document.getElementById('verdict'),ddPct=(currentDD/maxDD)*100;let msg,cls;
+      if(rec.passRate>=65){cls='good';msg=`You're in a solid position. At ${(rec.riskPct*100).toFixed(2)}% risk per trade (${fmt(recRiskAmt)} per trade) you have a ${fmtP(rec.passRate)} chance of passing in approximately ${rec.avgDPass} days. Your worst ever losing streak of ${maxConsec} losses would cost ${fmt(streakCost)}, leaving ${fmt(Math.max(0,bufferAfterStreak))} of buffer.`;}
+      else if(rec.passRate>=40){cls='ok';msg=`Your position is tight — ${fmtP(ddPct)} of drawdown used. The recommended ${(rec.riskPct*100).toFixed(2)}% risk gives a ${fmtP(rec.passRate)} pass chance over ~${rec.avgDPass} days. Stick to your daily loss limit and do not increase size.`;}
+      else{cls='bad';msg=`This is a difficult recovery. Even the conservative approach gives only a ${fmtP(results[0].passRate)} pass chance. With ${fmt(ddLeft)} of buffer left, focus on capital preservation above everything else.`;}
+      vEl.textContent=msg;vEl.className='verdict '+cls;
+      document.getElementById('results').classList.add('visible');updateStatus();
     }
   </script>
 
