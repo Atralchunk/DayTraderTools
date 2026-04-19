@@ -3,16 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CalcHub — Free Calculators for Traders & More</title>
-  <meta name="description" content="Free, no-nonsense calculators for traders and decision makers. No paywalls, no fluff.">
+  <title>Day Trader Tools — Free Calculators & Education for Traders</title>
+  <meta name="description" content="Free tools, calculators and education for day traders and prop traders. No paywalls, no fluff.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+  <div class="disclaimer-overlay" id="disclaimerOverlay">
+    <div class="disclaimer-modal">
+      <h2>Important — please read</h2>
+      <p>Day Trader Tools provides calculators, simulations and educational content for <strong style="color:#fff;">informational and educational purposes only</strong>. Nothing on this site is financial advice or a recommendation to trade any financial instrument.</p>
+      <p>Trading involves significant risk. The majority of retail traders lose money. All calculator results are hypothetical simulations based on the inputs you provide — they are not predictions of future performance.</p>
+      <p>By continuing you confirm you understand this site is for educational purposes only and that you have read our <a href="disclaimer.html">full legal disclaimer</a>.</p>
+      <button class="disclaimer-accept" onclick="acceptDisclaimer()">I understand — continue to the site</button>
+    </div>
+  </div>
+
   <nav class="nav">
-    <a href="index.html" class="nav-logo">CALCHUB</a>
+    <a href="index.html" class="nav-logo">DAY TRADER TOOLS</a>
     <div class="nav-links">
       <a href="index.html" class="active">Home</a>
       <a href="blog/index.html">Blog</a>
@@ -22,9 +32,9 @@
   </nav>
 
   <div class="hero">
-    <div class="hero-tag">Free tools for traders &amp; beyond</div>
-    <h1>Calculators that <span>actually matter</span></h1>
-    <p>No fluff, no paywalls. Sharp tools built around the numbers that drive real decisions.</p>
+    <div class="hero-tag">Free tools for traders</div>
+    <h1>Trade smarter, <span>not harder</span></h1>
+    <p>Free calculators, education and honest insights for day traders and prop traders. No paywalls, no fluff.</p>
   </div>
 
   <div class="calc-grid">
@@ -103,10 +113,48 @@
     <a href="blog/index.html" class="blog-teaser-all">View all articles →</a>
   </div>
 
+  <div class="disclaimer-bar">
+    <strong style="color:rgba(255,255,255,0.6);">Educational purposes only.</strong> Nothing on this site is financial advice or a recommendation to trade. Trading involves significant risk. <a href="disclaimer.html">Read our full disclaimer →</a>
+  </div>
+
   <footer class="footer">
-    <div class="footer-logo">CALCHUB</div>
-    <div class="footer-copy">Free to use, always.</div>
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">DAY TRADER TOOLS</div>
+        <p class="footer-tagline">Free tools and education for day traders and prop traders. No paywalls, ever.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <a href="calculators/day-trading.html">Day trading simulator</a>
+        <a href="calculators/prop-eval.html">Prop eval calculator</a>
+        <a href="calculators/funded-account.html">Funded account calculator</a>
+      </div>
+      <div class="footer-col">
+        <h4>Site</h4>
+        <a href="blog/index.html">Blog</a>
+        <a href="education/index.html">Education</a>
+        <a href="about.html">About</a>
+        <a href="mailto:hello@daytradertools.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 Day Trader Tools. For educational use only.</div>
+      <div class="footer-legal">
+        <a href="disclaimer.html">Disclaimer</a>
+        <a href="privacy.html">Privacy policy</a>
+      </div>
+    </div>
   </footer>
+
+  <script>
+    function acceptDisclaimer() {
+      document.getElementById('disclaimerOverlay').classList.add('hidden');
+      localStorage.setItem('dtt-disclaimer-accepted', '1');
+    }
+    if (localStorage.getItem('dtt-disclaimer-accepted')) {
+      document.getElementById('disclaimerOverlay').classList.add('hidden');
+    }
+  </script>
 
 </body>
 </html>
