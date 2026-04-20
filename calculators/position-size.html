@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Position Size Calculator — Day Trader Tools</title>
+  <meta name="description" content="Calculate your exact position size for forex, metals and futures. Enter your balance, risk % and stop loss — we handle the rest with live exchange rates.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .toggle-row{display:flex;gap:8px;margin-bottom:1.5rem;}
+    .toggle-btn{flex:1;padding:10px;border:.5px solid rgba(255,255,255,0.15);border-radius:8px;background:transparent;color:rgba(255,255,255,0.45);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
+    .toggle-btn.active{background:#1D9E75;border-color:#1D9E75;color:#fff;}
+    .rate-status{font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:1rem;font-family:'Space Mono',monospace;}
+    .rate-status.ok{color:#1D9E75;}
+    .rate-status.err{color:#E24B4A;}
+    .result-main{background:rgba(255,255,255,0.03);border:.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.5rem;margin-bottom:1rem;text-align:center;}
+    .result-main .rl{font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+    .result-main .rv{font-family:'Space Mono',monospace;font-size:36px;font-weight:700;color:#1D9E75;margin-bottom:4px;}
+    .result-main .rs{font-size:12px;color:rgba(255,255,255,0.4);}
+    .info-box{border:.5px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 14px;font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:1rem;}
+    .info-box strong{color:#fff;}
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="../index.html" class="nav-logo">DAY TRADER TOOLS</a>
+    <div class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="../blog/index.html">Blog</a>
+      <a href="../education/index.html">Education</a>
+      <a href="../calculators/day-trading.html" class="active">Calculators</a>
+    </div>
+  </nav>
+
+  <div class="calc-page">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <span style="color:rgba(255,255,255,0.5)">Position size calculator</span>
+    </div>
+    <div class="calc-page-title">Position size calculator</div>
+    <div class="calc-page-sub">Forex, metals and futures — tell us your risk, we'll tell you your size</div>
+
+    <div class="calc-inner" style="max-width:760px;">
+
+      <div class="toggle-row">
+        <button class="toggle-btn active" id="btn-forex" onclick="setMode('forex')">Forex &amp; metals</button>
+        <button class="toggle-btn" id="btn-futures" onclick="setMode('futures')">Futures &amp; indices</button>
+      </div>
+
+      <p class="section-label">Your account</p>
+      <div class="input-grid">
+        <div class="inp-field">
+          <label>Account balance</label>
+          <input type="number" id="balance" value="10000" min="1">
+          <span class="hint">Your total trading account balance</span>
+        </div>
+        <div class="inp-field">
+          <label>Account currency</label>
+          <select id="accountCurrency" style="font-family:'Space Mono',monospace;font-size:14px;padding:9px 11px;border-radius:8px;border:0.5px solid rgba(255,255,255,0.1);background:#0a0a0a;color:#fff;width:100%;">
+            <option value="USD">USD — US Dollar</option>
+            <option value="GBP" selected>GBP — British Pound</option>
+            <option value="EUR">EUR — Euro</option>
+            <option value="CAD">CAD — Canadian Dollar</option>
+            <option value="AUD">AUD — Australian Dollar</option>
+            <option value="JPY">JPY — Japanese Yen</option>
+            <option value="CHF">CHF — Swiss Franc</option>
+            <option value="NZD">NZD — New Zealand Dollar</option>
+          </select>
+          <span class="hint">The currency your account is held in</span>
+        </div>
+        <div class="inp-field">
+          <label>Risk per trade (%)</label>
+          <input type="number" id="riskPct" value="1" min="0.01" max="100" step="0.01">
+          <span class="hint">% of balance you're willing to lose on this trade</span>
+        </div>
+        <div class="inp-field">
+          <label>Stop loss</label>
+          <input type="number" id="stopLoss" value="20" min="0.1" step="0.1">
+          <span class="hint" id="slHint">In pips — e.g. 20 pips</span>
+        </div>
+      </div>
+
+      <p class="section-label">Instrument</p>
+      <div class="input-grid">
+        <div class="inp-field">
+          <label>Pair / instrument</label>
+          <select id="instrument" onchange="onInstrumentChange()" style="font-family:'Space Mono',monospace;font-size:14px;padding:9px 11px;border-radius:8px;border:0.5px solid rgba(255,255,255,0.1);background:#0a0a0a;color:#fff;width:100%;"></select>
+          <span class="hint" id="instrHint">Select the instrument you're trading</span>
+        </div>
+        <div class="inp-field" id="priceField" style="display:none;">
+          <label>Current price</label>
+          <input type="number" id="currentPrice" value="" step="0.001">
+          <span class="hint">Needed for JPY pairs and metals to calculate pip value accurately</span>
+        </div>
+      </div>
+
+      <div class="rate-status" id="rateStatus"></div>
+
+      <button class="calc-btn" id="calcBtn" onclick="calculate()">Calculate position size →</button>
+
+      <div class="results" id="results">
+
+        <div class="result-main">
+          <div class="rl">Position size</div>
+          <div class="rv" id="r-lots">—</div>
+          <div class="rs" id="r-units">—</div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric"><div class="ml">Amount at risk</div><div class="mv pos" id="r-risk">—</div></div>
+          <div class="metric"><div class="ml">Pip / tick value</div><div class="mv neu" id="r-pipval">—</div></div>
+          <div class="metric"><div class="ml">Value per lot / contract</div><div class="mv neu" id="r-lotval">—</div></div>
+          <div class="metric"><div class="ml">Exchange rate used</div><div class="mv neu" id="r-rate">—</div></div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="info-box" id="r-summary"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer-bar">
+    <strong style="color:rgba(255,255,255,0.6);">Educational purposes only.</strong> Nothing on this site is financial advice or a recommendation to trade. Trading involves significant risk. <a href="../disclaimer.html">Read our full disclaimer →</a>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">DAY TRADER TOOLS</div>
+        <p class="footer-tagline">Free tools and education for day traders and prop traders. No paywalls, ever.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <a href="../calculators/day-trading.html">Day trading simulator</a>
+        <a href="../calculators/position-size.html">Position size calculator</a>
+        <a href="../calculators/prop-eval.html">Prop eval calculator</a>
+        <a href="../calculators/funded-account.html">Funded account calculator</a>
+      </div>
+      <div class="footer-col">
+        <h4>Site</h4>
+        <a href="../blog/index.html">Blog</a>
+        <a href="../education/index.html">Education</a>
+        <a href="../about.html">About</a>
+        <a href="mailto:blahblah23@blahblah.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 Day Trader Tools. For educational use only.</div>
+      <div class="footer-legal">
+        <a href="../disclaimer.html">Disclaimer</a>
+        <a href="../privacy.html">Privacy policy</a>
+        <a href="../affiliate-disclosure.html">Affiliate disclosure</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const FOREX = [
+      {name:'EUR/USD',  symbol:'EURUSD', pipSize:0.0001, contractSize:100000, quoteCurrency:'USD'},
+      {name:'GBP/USD',  symbol:'GBPUSD', pipSize:0.0001, contractSize:100000, quoteCurrency:'USD'},
+      {name:'USD/JPY',  symbol:'USDJPY', pipSize:0.01,   contractSize:100000, quoteCurrency:'JPY'},
+      {name:'USD/CHF',  symbol:'USDCHF', pipSize:0.0001, contractSize:100000, quoteCurrency:'CHF'},
+      {name:'USD/CAD',  symbol:'USDCAD', pipSize:0.0001, contractSize:100000, quoteCurrency:'CAD'},
+      {name:'AUD/USD',  symbol:'AUDUSD', pipSize:0.0001, contractSize:100000, quoteCurrency:'USD'},
+      {name:'NZD/USD',  symbol:'NZDUSD', pipSize:0.0001, contractSize:100000, quoteCurrency:'USD'},
+      {name:'EUR/GBP',  symbol:'EURGBP', pipSize:0.0001, contractSize:100000, quoteCurrency:'GBP'},
+      {name:'EUR/JPY',  symbol:'EURJPY', pipSize:0.01,   contractSize:100000, quoteCurrency:'JPY'},
+      {name:'GBP/JPY',  symbol:'GBPJPY', pipSize:0.01,   contractSize:100000, quoteCurrency:'JPY'},
+      {name:'EUR/CHF',  symbol:'EURCHF', pipSize:0.0001, contractSize:100000, quoteCurrency:'CHF'},
+      {name:'GBP/CHF',  symbol:'GBPCHF', pipSize:0.0001, contractSize:100000, quoteCurrency:'CHF'},
+      {name:'AUD/JPY',  symbol:'AUDJPY', pipSize:0.01,   contractSize:100000, quoteCurrency:'JPY'},
+      {name:'EUR/CAD',  symbol:'EURCAD', pipSize:0.0001, contractSize:100000, quoteCurrency:'CAD'},
+      {name:'GBP/CAD',  symbol:'GBPCAD', pipSize:0.0001, contractSize:100000, quoteCurrency:'CAD'},
+      {name:'EUR/AUD',  symbol:'EURAUD', pipSize:0.0001, contractSize:100000, quoteCurrency:'AUD'},
+      {name:'GBP/AUD',  symbol:'GBPAUD', pipSize:0.0001, contractSize:100000, quoteCurrency:'AUD'},
+      {name:'AUD/CAD',  symbol:'AUDCAD', pipSize:0.0001, contractSize:100000, quoteCurrency:'CAD'},
+      {name:'Gold (XAU/USD)',   symbol:'XAUUSD', pipSize:0.01,  contractSize:100,  quoteCurrency:'USD'},
+      {name:'Silver (XAG/USD)', symbol:'XAGUSD', pipSize:0.001, contractSize:5000, quoteCurrency:'USD'},
+    ];
+
+    const FUTURES = [
+      {name:'S&P 500 (ES)',          symbol:'ES',   tickSize:0.25, tickValue:12.50, currency:'USD'},
+      {name:'Nasdaq 100 (NQ)',        symbol:'NQ',   tickSize:0.25, tickValue:5.00,  currency:'USD'},
+      {name:'Dow Jones (YM)',         symbol:'YM',   tickSize:1,    tickValue:5.00,  currency:'USD'},
+      {name:'Russell 2000 (RTY)',     symbol:'RTY',  tickSize:0.10, tickValue:5.00,  currency:'USD'},
+      {name:'Micro S&P 500 (MES)',    symbol:'MES',  tickSize:0.25, tickValue:1.25,  currency:'USD'},
+      {name:'Micro Nasdaq (MNQ)',     symbol:'MNQ',  tickSize:0.25, tickValue:0.50,  currency:'USD'},
+      {name:'Micro Dow (MYM)',        symbol:'MYM',  tickSize:1,    tickValue:0.50,  currency:'USD'},
+      {name:'Micro Russell (M2K)',    symbol:'M2K',  tickSize:0.10, tickValue:0.50,  currency:'USD'},
+      {name:'DAX (FDAX)',             symbol:'FDAX', tickSize:0.5,  tickValue:12.50, currency:'EUR'},
+      {name:'FTSE 100 (Z)',           symbol:'Z',    tickSize:0.5,  tickValue:5.00,  currency:'GBP'},
+      {name:'Crude Oil (CL)',         symbol:'CL',   tickSize:0.01, tickValue:10.00, currency:'USD'},
+      {name:'Gold Futures (GC)',      symbol:'GC',   tickSize:0.10, tickValue:10.00, currency:'USD'},
+      {name:'Micro Gold (MGC)',       symbol:'MGC',  tickSize:0.10, tickValue:1.00,  currency:'USD'},
+      {name:'Natural Gas (NG)',       symbol:'NG',   tickSize:0.001,tickValue:10.00, currency:'USD'},
+    ];
+
+    let mode = 'forex';
+    let fxRates = {};
+
+    function setMode(m){
+      mode = m;
+      document.getElementById('btn-forex').classList.toggle('active', m==='forex');
+      document.getElementById('btn-futures').classList.toggle('active', m==='futures');
+      document.getElementById('slHint').textContent = m==='forex' ? 'In pips — e.g. 20 pips' : 'In points — e.g. 10 points';
+      populateInstruments();
+      document.getElementById('results').classList.remove('visible');
+      document.getElementById('rateStatus').textContent = '';
+    }
+
+    function populateInstruments(){
+      const sel = document.getElementById('instrument');
+      sel.innerHTML = '';
+      const list = mode==='forex' ? FOREX : FUTURES;
+      list.forEach((inst,i)=>{
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = inst.name;
+        sel.appendChild(opt);
+      });
+      onInstrumentChange();
+    }
+
+    function onInstrumentChange(){
+      if(mode==='futures'){ document.getElementById('priceField').style.display='none'; return; }
+      const inst = FOREX[parseInt(document.getElementById('instrument').value)];
+      const needsPrice = inst && (inst.quoteCurrency==='JPY'||inst.symbol==='XAUUSD'||inst.symbol==='XAGUSD');
+      document.getElementById('priceField').style.display = needsPrice ? 'flex' : 'none';
+    }
+
+    async function fetchRates(base){
+      const el = document.getElementById('rateStatus');
+      el.textContent = 'Fetching live exchange rates...';
+      el.className = 'rate-status';
+      try {
+        const res = await fetch(`https://open.er-api.com/v6/latest/${base}`);
+        const data = await res.json();
+        if(data.result === 'success'){
+          fxRates = data.rates;
+          const t = new Date(data.time_last_update_utc).toLocaleTimeString();
+          el.textContent = `Live rates loaded (updated ${t})`;
+          el.className = 'rate-status ok';
+        } else { throw new Error(); }
+      } catch(e){
+        fxRates = {USD:1,GBP:0.79,EUR:0.92,JPY:150.5,CAD:1.36,AUD:1.53,CHF:0.90,NZD:1.64,SEK:10.4,NOK:10.6,DKK:6.9,SGD:1.34,HKD:7.82};
+        el.textContent = 'Could not fetch live rates — using approximate fallback rates. Refresh and try again.';
+        el.className = 'rate-status err';
+      }
+    }
+
+    function getRate(from, to){
+      if(from===to) return 1;
+      if(fxRates[to] && fxRates[from]) return fxRates[to]/fxRates[from];
+      return 1;
+    }
+
+    function fmtCcy(n, ccy){ return n.toFixed(2)+' '+ccy; }
+
+    async function calculate(){
+      const btn = document.getElementById('calcBtn');
+      btn.disabled = true;
+      btn.textContent = 'Fetching rates...';
+
+      const accountCcy = document.getElementById('accountCurrency').value;
+      await fetchRates(accountCcy);
+
+      btn.disabled = false;
+      btn.textContent = 'Calculate position size →';
+
+      const balance   = parseFloat(document.getElementById('balance').value);
+      const riskPct   = parseFloat(document.getElementById('riskPct').value)/100;
+      const stopLoss  = parseFloat(document.getElementById('stopLoss').value);
+      const riskAmt   = balance * riskPct;
+
+      if([balance,riskPct,stopLoss].some(isNaN)||stopLoss<=0) return;
+
+      if(mode==='forex'){
+        const inst = FOREX[parseInt(document.getElementById('instrument').value)];
+        const priceInput = parseFloat(document.getElementById('currentPrice').value);
+        const needsPrice = inst.quoteCurrency==='JPY'||inst.symbol==='XAUUSD'||inst.symbol==='XAGUSD';
+
+        if(needsPrice && (!priceInput||isNaN(priceInput))){
+          document.getElementById('rateStatus').textContent = 'Please enter the current price for this instrument.';
+          document.getElementById('rateStatus').className = 'rate-status err';
+          return;
+        }
+
+        let pipValueUSD;
+        if(inst.quoteCurrency==='USD'){
+          pipValueUSD = inst.pipSize * inst.contractSize;
+        } else if(inst.quoteCurrency==='JPY'){
+          pipValueUSD = (inst.pipSize * inst.contractSize) / priceInput;
+        } else if(inst.symbol==='XAUUSD'||inst.symbol==='XAGUSD'){
+          pipValueUSD = inst.pipSize * inst.contractSize;
+        } else {
+          pipValueUSD = inst.pipSize * inst.contractSize * getRate(inst.quoteCurrency,'USD');
+        }
+
+        const rateAcctToUSD = getRate(accountCcy,'USD');
+        const riskAmtUSD    = riskAmt * rateAcctToUSD;
+        const lots          = riskAmtUSD / (stopLoss * pipValueUSD);
+        const pipValueAcct  = pipValueUSD / rateAcctToUSD;
+        const isMetals      = inst.symbol==='XAUUSD'||inst.symbol==='XAGUSD';
+        const lotLabel      = isMetals ? 'lots' : 'lots';
+        const unitsLabel    = isMetals
+          ? (lots * inst.contractSize).toFixed(2) + ' oz'
+          : Math.round(lots * inst.contractSize).toLocaleString() + ' units';
+
+        const rateDisplay = accountCcy==='USD' ? '1.0000' : getRate(accountCcy,'USD').toFixed(4);
+
+        document.getElementById('r-lots').textContent   = lots.toFixed(2) + ' lots';
+        document.getElementById('r-units').textContent  = unitsLabel;
+        document.getElementById('r-risk').textContent   = fmtCcy(riskAmt, accountCcy);
+        document.getElementById('r-pipval').textContent = fmtCcy(pipValueAcct, accountCcy) + '/pip';
+        document.getElementById('r-lotval').textContent = fmtCcy(pipValueAcct / inst.pipSize, accountCcy) + '/lot';
+        document.getElementById('r-rate').textContent   = '1 '+accountCcy+' = '+rateDisplay+' USD';
+        document.getElementById('r-summary').innerHTML  =
+          `<strong>Summary:</strong> Trading <strong>${inst.name}</strong> with a <strong>${stopLoss} pip</strong> stop loss. ` +
+          `To risk <strong>${fmtCcy(riskAmt, accountCcy)}</strong> (${(riskPct*100).toFixed(2)}% of your ${balance.toLocaleString()} ${accountCcy} balance) ` +
+          `you need <strong>${lots.toFixed(2)} lots</strong> (${unitsLabel}). ` +
+          `Each pip is worth ${fmtCcy(pipValueAcct, accountCcy)} at this position size.`;
+
+      } else {
+        const inst          = FUTURES[parseInt(document.getElementById('instrument').value)];
+        const rateToAcct    = getRate(inst.currency, accountCcy);
+        const tickValueAcct = inst.tickValue * rateToAcct;
+        const ticksInStop   = stopLoss / inst.tickSize;
+        const riskPerContr  = ticksInStop * tickValueAcct;
+        const exactContracts= riskAmt / riskPerContr;
+        const contracts     = Math.max(1, Math.round(exactContracts));
+        const actualRisk    = contracts * riskPerContr;
+        const pointValue    = tickValueAcct * (1/inst.tickSize);
+        const rateDisplay   = accountCcy===inst.currency ? '1.0000' : getRate(inst.currency, accountCcy).toFixed(4);
+
+        document.getElementById('r-lots').textContent   = contracts + ' contract' + (contracts!==1?'s':'');
+        document.getElementById('r-units').textContent  = exactContracts.toFixed(2) + ' exact — rounded to ' + contracts;
+        document.getElementById('r-risk').textContent   = fmtCcy(actualRisk, accountCcy);
+        document.getElementById('r-pipval').textContent = fmtCcy(tickValueAcct, accountCcy) + '/tick';
+        document.getElementById('r-lotval').textContent = fmtCcy(pointValue, accountCcy) + '/point';
+        document.getElementById('r-rate').textContent   = '1 '+inst.currency+' = '+rateDisplay+' '+accountCcy;
+        document.getElementById('r-summary').innerHTML  =
+          `<strong>Summary:</strong> Trading <strong>${inst.name}</strong> with a <strong>${stopLoss} point</strong> stop (${ticksInStop} ticks). ` +
+          `To risk <strong>${fmtCcy(riskAmt, accountCcy)}</strong> you need <strong>${contracts} contract${contracts!==1?'s':''}</strong>. ` +
+          `Actual risk at ${contracts} contract${contracts!==1?'s':''}: <strong>${fmtCcy(actualRisk, accountCcy)}</strong>. ` +
+          `Each point move is worth ${fmtCcy(pointValue, accountCcy)}.`;
+      }
+
+      document.getElementById('results').classList.add('visible');
+    }
+
+    populateInstruments();
+  </script>
+
+</body>
+</html>
