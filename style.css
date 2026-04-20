@@ -608,6 +608,14 @@ body {
   color: rgba(255,255,255,0.3);
   margin-bottom: 1rem;
 }
+.homepage-affiliate .affiliate-block {
+  max-width: 520px;
+}
+@media (max-width: 600px) {
+  .homepage-affiliate .affiliate-block {
+    max-width: 100%;
+  }
+}
 
 /* ── Blog teaser (homepage) ── */
 .blog-teaser {
